@@ -1,3 +1,6 @@
+# this is the command to install all the modules in the requirements.txt file
+# pip install -r requirements.txt
+
 
 # venv312\Scripts\activate   --- this line is a comment indicating how to activate the virtual environment in Windows. You can run this command in your command prompt to activate the virtual environment before running the script.
 # py -3.12 -m venv venv312  this line is show to how to create a virtual environment using Python 3.12. You can run this command in your command prompt to create a new virtual environment named "venv312".
