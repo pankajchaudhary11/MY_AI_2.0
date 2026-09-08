@@ -1,0 +1,10 @@
+openai
+wikipedia
+SpeechRecognition
+pywin32
+groq
+requests
+pyautogui
+Pillow
+pywinauto
+google-genai
