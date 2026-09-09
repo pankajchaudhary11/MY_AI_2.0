@@ -1249,7 +1249,7 @@ def control_active_window(query):
 
     Your job is to COMPLETE the user's ORIGINAL COMMAND.
 
-    ha agar user kuch video song play karne ki baat kar rha he chrome par to youtube kholna he 
+    important: agar user kuch keval video song play karne ki baat kar rha he chrome par to youtube kholna he 
 
     There is NO predefined workflow.
 
@@ -1374,6 +1374,8 @@ def control_active_window(query):
 
     26. when youtube video is paused then click on play button to play the video.
 
+    27. when you need to scroll you choose scroll up and scroll down as your need and when you need press down and up key so you can choose up and down key.
+
     --------------------------------------------------
     ALLOWED OUTPUTS
     --------------------------------------------------
@@ -1402,6 +1404,17 @@ def control_active_window(query):
       "key": "CTRL+L",
       "reason": "short reason"
     }}
+    {{
+      "action": "KEY",
+      "key": "SCROLL_UP",
+      "reason": "short reason"
+    }}
+    {{
+      "action": "KEY",
+      "key": "SCROLL_DOWN",
+      "reason": "short reason"
+    }}
+
 
     ENTER:
 
@@ -1922,13 +1935,28 @@ def control_active_window(query):
             "F10": "f10",
             "F11": "f11",
             "F12": "f12",
+            "SCROLL_UP": "scroll_up",
+            "SCROLL_DOWN": "scroll_down",
         }
 
         if key_text in single_keys:
 
-            pyautogui.press(
-                single_keys[key_text]
-            )
+            if key_text == "SCROLL_UP":
+                start = time.time()
+    
+                while time.time() - start < 5:
+                    pyautogui.scroll(50)
+                    time.sleep(0.1)
+            elif key_text == "SCROLL_DOWN":
+                        start = time.time()
+            
+                        while time.time() - start < 5:
+                            pyautogui.scroll(-50)
+                            time.sleep(0.1)
+            else:
+                pyautogui.press(
+                    single_keys[key_text]
+                )
 
         else:
 
