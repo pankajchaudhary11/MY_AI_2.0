@@ -1376,6 +1376,8 @@ def control_active_window(query):
 
     27. when you need to scroll you choose scroll up and scroll down as your need and when you need press down and up key so you can choose up and down key.
 
+    28. agar tum youtube par ho or youtube par search karna chahte ho to jab youtube ke search par ho tabhi vha click karna chahie or tumhe agar koi video nhi dikh rhi screenshot me ya niche he to scroll down kar ke dekh sakte ho.
+
     --------------------------------------------------
     ALLOWED OUTPUTS
     --------------------------------------------------
