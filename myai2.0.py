@@ -1232,102 +1232,127 @@ def control_active_window(query):
     # GEMINI PLANNER
     # ============================================================
 
+    
     def ask_gemini_next_action(
         command,
         active_window,
         ui_elements
     ):
-
+    
         ui_context = build_ui_context(
             ui_elements
         )
-
+    
         history = compact_history()
-
+    
         prompt = f"""
     You are the planning brain of a Windows computer-control agent.
-
+    
     Your job is to COMPLETE the user's ORIGINAL COMMAND.
-
-    important: agar user kuch keval video song play karne ki baat kar rha he chrome par to youtube kholna he 
-
+    
+    this is your previous history:
+    {history}
+    
+    important: agar user kuch keval video song play karne ki baat kar rha he chrome par to youtube kholna he
+    
     There is NO predefined workflow.
-
+    
     Do NOT assume:
+    
     - Chrome always comes first
     - YouTube always comes next
     - LinkedIn always comes next
     - Search is always the same
     - Every command has the same number of steps
-
+    - If a Terminal in vscode window is visible, do not interact with it, do not type anything, do not click anything, or do not modify it under any circumstances.
+    
     Understand the actual natural-language command.
-
+    
     --------------------------------------------------
     ORIGINAL COMMAND
     --------------------------------------------------
-
+    
     {command}
-
+    
     --------------------------------------------------
     CURRENT ACTIVE WINDOW
     --------------------------------------------------
-
+    
     {active_window}
-
+    
     --------------------------------------------------
     TASK HISTORY
     --------------------------------------------------
-
+    
     {json.dumps(
         history,
         indent=2,
         ensure_ascii=False
     )}
-
+    
     --------------------------------------------------
     CURRENT UI ELEMENTS
     --------------------------------------------------
-
+    
     {ui_context}
-
+    
+    --------------------------------------------------
+    CURRENT SCREENSHOT
+    --------------------------------------------------
+    
+    The attached image is the CURRENT SCREEN of the computer.
+    
+    Use the screenshot together with CURRENT UI ELEMENTS
+    to understand what is actually visible on the screen.
+    
+    IMPORTANT:
+    - The screenshot represents the current screen state.
+    - Do not assume an element is visible only because it exists in UIA.
+    - If the screenshot and UI elements disagree, carefully inspect
+      the screenshot before choosing an action.
+    - For CLICK, make sure the target_id corresponds to the actual
+      visible object.
+    - Do not click something only because its name looks correct.
+    - If multiple similar elements exist, use the screenshot to
+      determine which one belongs to the requested task.
+    
     --------------------------------------------------
     IMPORTANT RULES
     --------------------------------------------------
-
     
-
     1. ORIGINAL COMMAND is the source of truth.
-
+    
     2. COMPLETED ACTIONS tell you what has already happened.
-
+    
     3. FAILED ACTIONS tell you what did NOT work.
-
+    
     4. Never declare DONE just because one part of a
        multi-part command is finished.
-
+    
     5. Only return DONE when the complete original command
        has been fulfilled.
-
+    
     6. If the browser/app is already open but the requested
        website/page is not open, continue navigation.
-
+    
     7. If the requested page is already open, use it.
-
+    
     8. If a target exists in CURRENT UI ELEMENTS,
        CLICK must use its exact target_id.
-
+    
     9. NEVER invent target IDs.
-
+    
     10. If CURRENT UI ELEMENTS says:
            [NO UI ELEMENTS DETECTED]
         then do NOT use CLICK with an invented ID.
-
+    
     11. When UIA does not expose a control but a keyboard
         shortcut can perform the next action, use KEY.
-
+    
     12. KEY can be used for generic keyboard actions.
-
+    
     13. Examples of valid KEY values:
+    
            WIN
            ENTER
            ESC
@@ -1338,150 +1363,239 @@ def control_active_window(query):
            BACKSPACE
            CTRL+C
            CTRL+V
-
+           UP
+           DOWN
+           LEFT
+           RIGHT
+           SCROLL_UP
+           SCROLL_DOWN
+    
     14. Do not use a keyboard shortcut just because it is
         convenient if a visible UI target is clearly available.
-
+    
     15. TYPE should normally target a real UI element.
-
+    
     16. If the current UI has an address bar, search box,
         textbox, etc., use its exact target_id.
-
+    
     17. If an application needs to be opened and there is
         no visible UI element for it, KEY can be used to open
         the Windows Start/search interface.
-
+    
     18. Interpret obvious spelling mistakes from context.
-
+    
     19. Do not perform unrelated actions.
-
+    
     20. Execute ONE action at a time.
-
+    
     21. After an action, the program will scan the UI again
         and ask you for the next action.
-
+    
     22. If a previous action failed, choose a genuinely
         different approach instead of blindly repeating it.
-
+    
     23. If the command asks for multiple things joined by
         "and", "then", "after that", etc., complete them all.
-
+    
     24. If a website/search is requested, do not stop before
         the requested navigation/search has actually happened.
-
+    
     25. For a media task, only open/play a result when the
         original command actually requires opening/playing it.
-
-    26. when youtube video is paused then click on play button to play the video.
-
-    27. when you need to scroll you choose scroll up and scroll down as your need and when you need press down and up key so you can choose up and down key.
-
-    28. agar tum youtube par ho or youtube par search karna chahte ho to jab youtube ke search par ho tabhi vha click karna chahie or tumhe agar koi video nhi dikh rhi screenshot me ya niche he to scroll down kar ke dekh sakte ho.
-
+    
+    26. When a YouTube video is paused, click the play button
+        to play the video.
+    
+    27. When you need to scroll, choose SCROLL_UP or
+        SCROLL_DOWN according to what is required.
+    
+    28. If you need to press an arrow key, use UP, DOWN,
+        LEFT or RIGHT according to what is required.
+    
+    29. Agar tum YouTube par ho aur YouTube par search karna
+        chahte ho, to YouTube ke search box ko hi target karo.
+        Agar requested video screenshot me visible nahi hai,
+        scroll down karke dekho.
+    
+    30. Agar VS Code ke terminal me mouse hai ya terminal par
+        pehle se focus/click hai, to terminal ko kabhi interact
+        mat karo. Zarurat ho to pehle terminal se bahar kisi
+        safe visible target par click karo.
+    
+    31. Screenshot me red circle sirf visual verification ke
+        liye hota hai. Agar red circle galat element par hai,
+        us candidate ko reject karo aur doosra candidate try karo.
+    
+    32. Jab tak task sahi se complete nahi hota tab tak DONE
+        mat do.
+    
+    33. screenshot me check karo Jab application taskbar me already open ho, to Start
+        menu se search karne ke bajay taskbar ke existing
+        application target ko use karo.
+    
+    34. Agar current screen par requested website already open hai, to usse use karo. Do not open a new tab or window.
+    
     --------------------------------------------------
     ALLOWED OUTPUTS
     --------------------------------------------------
-
+    
     CLICK:
-
+    
     {{
       "action": "CLICK",
       "target_id": 123,
       "reason": "short reason"
     }}
-
+    
     TYPE:
-
+    
     {{
       "action": "TYPE",
       "target_id": 123,
       "text": "exact text",
       "reason": "short reason"
     }}
-
+    
     KEY:
-
+    
     {{
       "action": "KEY",
       "key": "CTRL+L",
       "reason": "short reason"
     }}
+    
+    KEY:
+    
     {{
       "action": "KEY",
       "key": "SCROLL_UP",
       "reason": "short reason"
     }}
+    
+    KEY:
+    
     {{
       "action": "KEY",
       "key": "SCROLL_DOWN",
       "reason": "short reason"
     }}
-
-
+    
     ENTER:
-
+    
     {{
       "action": "ENTER",
       "reason": "short reason"
     }}
-
+    
     WAIT:
-
+    
     {{
       "action": "WAIT",
       "seconds": 2,
       "reason": "short reason"
     }}
-
+    
     DONE:
-
+    
     {{
       "action": "DONE",
       "reason": "explain why the ORIGINAL COMMAND is fully complete"
     }}
-
+    
     --------------------------------------------------
     FINAL RULE
     --------------------------------------------------
-
+    
     Return ONLY valid JSON.
-
+    
     Do not return markdown.
-
+    
     Do not return explanations outside JSON.
     """
-
-        raw = gemini_text(
-            prompt
+    
+        # --------------------------------------------------------
+        # TAKE CURRENT SCREENSHOT
+        # --------------------------------------------------------
+    
+        screenshot = ImageGrab.grab()
+    
+        # Convert PIL image to PNG bytes
+        import io
+    
+        image_buffer = io.BytesIO()
+    
+        screenshot.save(
+            image_buffer,
+            format="PNG"
         )
-
+    
+        screenshot_bytes = (
+            image_buffer.getvalue()
+        )
+    
+        # --------------------------------------------------------
+        # SEND PROMPT + CURRENT SCREENSHOT TO GEMINI
+        # --------------------------------------------------------
+    
+        contents = [
+            prompt,
+            {
+                "inline_data": {
+                    "mime_type": "image/png",
+                    "data": screenshot_bytes
+                }
+            }
+        ]
+    
+        try:
+    
+            response = client.models.generate_content(
+                model=MODEL,
+                contents=contents
+            )
+    
+            raw = (
+                response.text.strip()
+                if response
+                and response.text
+                else ""
+            )
+    
+        except Exception as e:
+    
+            print(
+                f"[GEMINI ERROR] {str(e)[:500]}"
+            )
+    
+            return None
+    
         print("\n[GEMINI RAW]")
         print(raw)
-
+    
         result = parse_json(
             raw
         )
-
+    
         if not isinstance(
             result,
             dict
         ):
-
+    
             print(
                 "[PLANNER] Invalid JSON."
             )
-
+    
             return None
-
+    
         result["action"] = str(
             result.get(
                 "action",
                 ""
             )
         ).upper().strip()
-
+    
         return result
-
+    
 
     # ============================================================
     # FIND ELEMENT
